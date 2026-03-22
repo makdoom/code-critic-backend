@@ -8,6 +8,9 @@ const app: Express = express();
 
 app.set("trust proxy", 1);
 app.use(helmet());
+
+// For Webhook signature validation
+app.use("/api/v1/webhook/github/review", express.raw({ type: "*/*" }));
 app.use(express.json({ limit: "10mb" }));
 
 const limiter = rateLimit({

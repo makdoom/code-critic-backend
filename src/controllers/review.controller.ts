@@ -1,0 +1,38 @@
+import { Request, Response } from "express";
+import { verifyGitHubSignature } from "../utils/signatureValidation";
+import { config } from "../config";
+
+export const reviewController = async (req: Request, res: Response) => {
+  try {
+    const signature = req.headers["x-hub-signature-256"] as string;
+    if (!signature) return res.status(400).send("Missing signature");
+
+    const isValid = verifyGitHubSignature(
+      signature,
+      req.body as Buffer,
+      config.github.webhookSecret,
+    );
+
+    if (!isValid) return res.status(401).send("Invalid signature");
+
+    const event = req.headers["x-github-event"];
+    const body = JSON.parse(req.body.toString());
+
+    const { action, pull_request } = body;
+
+    // Only handle PR events
+    if (event !== "pull_request") return res.status(200).send("Ignored event");
+
+    if (action !== "opened")
+      return res.status(200).send(`Ignored action: ${action}`);
+
+    console.info("🔥 PR Opened:", pull_request.title);
+
+    // 👉 Your AI logic here
+
+    return res.status(200).send("PR opened event processed");
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

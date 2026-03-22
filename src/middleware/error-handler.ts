@@ -1,5 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
+import { config } from "../config";
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -10,10 +11,10 @@ export const errorHandler = (
   err: AppError,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
+  const message = err.message || "Internal Server Error";
 
   logger.error(`Error: ${message}`, {
     statusCode,
@@ -21,14 +22,12 @@ export const errorHandler = (
   });
 
   res.status(statusCode).json({
-    status: 'error',
+    status: "error",
     statusCode,
     message,
-    ...(config.nodeEnv === 'development' && { stack: err.stack }),
+    ...(config.nodeEnv === "development" && { stack: err.stack }),
   });
 };
-
-const config = { nodeEnv: process.env.NODE_ENV || 'development' };
 
 export const createError = (message: string, statusCode: number): AppError => {
   const error: AppError = new Error(message);
