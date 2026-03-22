@@ -17,12 +17,15 @@ export const config = {
   github: {
     webhookSecret: process.env.GITHUB_WEBHOOK_SECRET || "",
     accessToken: process.env.GITHUB_ACCESS_TOKEN || "",
+    githubAppId: process.env.GITHUB_APP_ID || "",
+    githubPrivateKey:
+      process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, "\n") || "",
   },
 
   ai: {
     provider: process.env.AI_PROVIDER || "openai",
     openaiApiKey: process.env.OPENAI_API_KEY || "",
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY || "",
+    geminiApiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || "",
   },
 } as const;
 

@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { verifyGitHubSignature } from "../utils/signatureValidation";
 import { config } from "../config";
+import { fetchPRDiff, postReviewComment } from "../services/github.service";
+import { reviewService } from "../services/review.service";
+import { extractPRContext } from "../utils/extractPRContext";
 
 export const reviewController = async (req: Request, res: Response) => {
   try {
@@ -18,7 +21,7 @@ export const reviewController = async (req: Request, res: Response) => {
     const event = req.headers["x-github-event"];
     const body = JSON.parse(req.body.toString());
 
-    const { action, pull_request } = body;
+    const { action } = body;
 
     // Only handle PR events
     if (event !== "pull_request") return res.status(200).send("Ignored event");
@@ -26,9 +29,19 @@ export const reviewController = async (req: Request, res: Response) => {
     if (action !== "opened")
       return res.status(200).send(`Ignored action: ${action}`);
 
-    console.info("🔥 PR Opened:", pull_request.title);
+    console.log(body);
+    process.exit();
+    const context = extractPRContext(body);
+    console.log(context);
 
-    // 👉 Your AI logic here
+    console.log("📦 Fetching diff from:", context.diffUrl);
+
+    const diff = await fetchPRDiff(context.diffUrl);
+    const review = await reviewService(diff);
+
+    console.log("🤖 Review result:", review);
+
+    await postReviewComment(context, review);
 
     return res.status(200).send("PR opened event processed");
   } catch (error) {

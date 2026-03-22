@@ -1,0 +1,181 @@
+// src/services/commentFormatter.ts
+
+import type {
+  ReviewResult,
+  ReviewIssue,
+  Verdict,
+  Severity,
+  IssueClassification,
+} from "../types/index.js";
+
+// ── Emoji maps ────────────────────────────────────────────────────────────────
+
+const VERDICT_EMOJI: Record<Verdict, string> = {
+  Excellent: "✅",
+  Good: "🟡",
+  "Needs Improvement": "🟠",
+  Poor: "🔴",
+  Critical: "🚨",
+};
+
+const SEVERITY_EMOJI: Record<Severity, string> = {
+  critical: "🚨",
+  high: "🔴",
+  medium: "🟠",
+  low: "🔵",
+};
+
+const CLASSIFICATION_BADGE: Record<IssueClassification, string> = {
+  blocking: "🔒 **BLOCKING**",
+  non_blocking: "⚠️ **Non-blocking**",
+  improvement: "💡 **Improvement**",
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const scoreBar = (score: number): string => {
+  const filled = Math.round(score / 10);
+  return "█".repeat(filled) + "░".repeat(10 - filled);
+};
+
+export const formatIssue = (issue: ReviewIssue): string => {
+  const severityEmoji = SEVERITY_EMOJI[issue.severity];
+  const badge = CLASSIFICATION_BADGE[issue.classification];
+  const location = issue.line
+    ? `\`${issue.file}\` line ${issue.line}`
+    : `\`${issue.file}\``;
+
+  const summaryLine = `${severityEmoji} ${badge} · \`${issue.type}\` · ${location}`;
+
+  const bodyLines: string[] = [
+    `<details>`,
+    `<summary>${summaryLine}</summary>`,
+    ``,
+    issue.message,
+  ];
+
+  if (issue.code) {
+    bodyLines.push(
+      ``,
+      `**Existing code**`,
+      `\`\`\`typescript`,
+      issue.code,
+      `\`\`\``,
+    );
+  }
+
+  if (issue.suggestion) {
+    bodyLines.push(
+      ``,
+      `**Suggestion**`,
+      `\`\`\`typescript`,
+      issue.suggestion,
+      `\`\`\``,
+    );
+  }
+
+  bodyLines.push(
+    ``,
+    `<sub>Confidence: ${Math.round(issue.confidence * 100)}%</sub>`,
+    `</details>`,
+  );
+
+  return bodyLines.join("\n");
+};
+
+// ── Main formatter ────────────────────────────────────────────────────────────
+
+export const formatReviewComment = (result: ReviewResult): string => {
+  const emoji = VERDICT_EMOJI[result.verdict];
+
+  const blocking: ReviewIssue[] = [];
+  const nonBlocking: ReviewIssue[] = [];
+  const improvements: ReviewIssue[] = [];
+
+  result.issues.forEach((issue) => {
+    if (issue.classification == "blocking") blocking.push(issue);
+    if (issue.classification == "non_blocking") nonBlocking.push(issue);
+    if (issue.classification == "improvement") improvements.push(issue);
+  });
+
+  const lines: string[] = [];
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  lines.push(`## ${emoji} AI Code Review · **${result.verdict}**`);
+  lines.push(``);
+  lines.push(
+    `\`${scoreBar(result.score)}\` **${result.score}/100** · \`${result.changeIntent}\``,
+  );
+  lines.push(``);
+  lines.push(`> ${result.summary}`);
+  lines.push(``);
+
+  // ── Walkthrough ──────────────────────────────────────────────────────────────
+  if (result.walkthrough.length > 0) {
+    lines.push(`### 📋 Walkthrough`);
+    lines.push(``);
+    for (const entry of result.walkthrough) {
+      lines.push(`- **\`${entry.file}\`** — ${entry.summary}`);
+    }
+    lines.push(``);
+  }
+
+  // ── Stats row ────────────────────────────────────────────────────────────────
+  lines.push(
+    `| 🔒 Blocking | ⚠️ Non-blocking | 💡 Improvements | 📝 Suggestions |`,
+  );
+  lines.push(
+    `|------------|----------------|-----------------|----------------|`,
+  );
+  lines.push(
+    `| ${blocking.length} | ${nonBlocking.length} | ${improvements.length} | ${result.suggestions.length} |`,
+  );
+  lines.push(``);
+
+  // ── Blocking issues ──────────────────────────────────────────────────────────
+  if (blocking.length > 0) {
+    lines.push(`### 🔒 Blocking Issues`);
+    lines.push(``);
+    for (const issue of blocking) {
+      lines.push(formatIssue(issue));
+      lines.push(``);
+    }
+  }
+
+  // ── Non-blocking issues ───────────────────────────────────────────────────────
+  if (nonBlocking.length > 0) {
+    lines.push(`### ⚠️ Non-blocking Issues`);
+    lines.push(``);
+    for (const issue of nonBlocking) {
+      lines.push(formatIssue(issue));
+      lines.push(``);
+    }
+  }
+
+  // ── Improvements ─────────────────────────────────────────────────────────────
+  if (improvements.length > 0) {
+    lines.push(`### 💡 Improvements`);
+    lines.push(``);
+    for (const issue of improvements) {
+      lines.push(formatIssue(issue));
+      lines.push(``);
+    }
+  }
+
+  // ── Suggestions ──────────────────────────────────────────────────────────────
+  if (result.suggestions.length > 0) {
+    lines.push(`### 📝 Suggestions`);
+    lines.push(``);
+    for (const s of result.suggestions) {
+      const filePrefix = s.file ? `**\`${s.file}\`** — ` : "";
+      lines.push(`- ${filePrefix}${s.message}`);
+    }
+    lines.push(``);
+  }
+
+  // ── Footer ───────────────────────────────────────────────────────────────────
+  lines.push(`---`);
+  lines.push(`<sub>🤖 Generated by ai-code-reviewer</sub>`);
+
+  return lines.join("\n");
+};
