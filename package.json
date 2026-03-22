@@ -4,12 +4,14 @@
   "description": "Automated code review system that analyzes pull requests using AI",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "nodemon --exec tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ngrok:dev": "ngrok http 8080",
+    "dev:all": "mprocs --config mprocs.yml"
   },
   "keywords": [
     "code-review",
@@ -37,6 +39,7 @@
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.2",
+    "nodemon": "^3.1.14",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

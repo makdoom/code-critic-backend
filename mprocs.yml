@@ -1,0 +1,6 @@
+procs:
+  node:
+    cmd: ["pnpm", "run", "dev"]
+
+  ngrok:
+    cmd: ["pnpm", "run", "ngrok:dev"]
