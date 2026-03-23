@@ -2,7 +2,7 @@ export type Verdict =
   | "Excellent"
   | "Good"
   | "Needs Improvement"
-  | "Poor"
+  | "Risky"
   | "Critical";
 
 export type ChangeIntent =

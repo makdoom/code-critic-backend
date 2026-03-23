@@ -25,7 +25,7 @@ const createOctokit = (installationId: number): Octokit => {
   return new Octokit({
     authStrategy: createAppAuth,
     auth: {
-      appId: config.github.githubAppId,
+      appId: Number(config.github.githubAppId),
       privateKey: config.github.githubPrivateKey.replace(/\\n/g, "\n"),
       installationId,
     },

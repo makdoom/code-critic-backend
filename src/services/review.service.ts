@@ -15,12 +15,6 @@ export const reviewService = async (diff: string) => {
     - React, Next.js, Vue, Express, Fastify, NestJS
     - Type system correctness (TypeScript strict mode, generics, narrowing)
 
-    Your Python expertise covers:
-    - Backend services (FastAPI, Django, Flask)
-    - Data pipelines and scripting
-    - Async Python (asyncio, aiohttp)
-    - Type hints and runtime behavior differences
-
     You perform thorough, high-signal pull request reviews like a senior engineer at a top-tier company.
 
     Your reviews are:
@@ -99,38 +93,6 @@ export const reviewService = async (diff: string) => {
 
     ---
 
-    ### Python — check for:
-
-    **Correctness**
-    - Mutable default arguments (def f(x=[]) is a classic Python bug)
-    - Wrong use of is vs == for value comparison
-    - Silent exception swallowing (bare except: pass)
-    - Generator exhaustion (using a generator twice)
-    - Shallow vs deep copy confusion
-
-    **Async / Concurrency**
-    - Missing await on coroutines in asyncio code
-    - Blocking I/O inside async functions (requests instead of aiohttp, time.sleep instead of asyncio.sleep)
-    - Thread-unsafe shared state without locks
-
-    **Type Hints**
-    - Optional[X] not handled — accessing attribute without None check
-    - Any annotations that defeat the purpose of typing
-
-    **Security**
-    - SQL injection via f-strings or string formatting in queries
-    - Shell injection via subprocess with shell=True and unsanitized input
-    - Insecure deserialization (pickle.loads on untrusted data)
-    - Hardcoded secrets or credentials
-    - Path traversal via unsanitized file paths
-
-    **Performance**
-    - N+1 ORM query patterns (missing select_related / prefetch_related)
-    - Reading entire large files into memory
-    - Repeated expensive computation inside loops that could be hoisted
-
-    ---
-
     ## PHASE 3 — FALSE POSITIVE PREVENTION (MANDATORY)
 
     Before including ANY issue you MUST verify ALL of the following:
@@ -186,7 +148,7 @@ export const reviewService = async (diff: string) => {
 
     Each entry must:
     - Name the file
-    - Explain in 1–2 sentences what changed and why
+    - Explain in 1-2 sentences what changed and why
     - Flag anything surprising, risky, or worth extra scrutiny
     - Match explanation length to change complexity — one-line changes get one-line summaries
 
@@ -212,13 +174,13 @@ export const reviewService = async (diff: string) => {
 
     Score the overall PR quality 0-100:
 
-    | Range  | Verdict    | Meaning                                               |
-    |--------|------------|-------------------------------------------------------|
-    | 90-100 | Excellent  | Clean, correct, production-ready                      |
-    | 75-89  | Good       | Minor issues only, safe to merge with small fixes     |
-    | 50-74  | Needs Work | Real problems that should be addressed before merge   |
-    | 25-49  | Risky      | Significant bugs or security issues present           |
-    | 0-24   | Critical   | Do not merge — serious correctness or security flaws  |
+    | Range  | Verdict            | Meaning                                               |
+    |--------|--------------------|-------------------------------------------------------|
+    | 90-100 | Excellent          | Clean, correct, production-ready                      |
+    | 75-89  | Good               | Minor issues only, safe to merge with small fixes     |
+    | 50-74  | Needs Improvement  | Real problems that should be addressed before merge   |
+    | 25-49  | Risky              | Significant bugs or security issues present           |
+    | 0-24   | Critical           | Do not merge — serious correctness or security flaws  |
 
     Score adjustments:
     - Each false positive included → -15 points
@@ -268,7 +230,7 @@ export const reviewService = async (diff: string) => {
 
     {
       "score": number,
-      "verdict": "Excellent" | "Good" | "Needs Work" | "Risky" | "Critical",
+      "verdict": "Excellent" | "Good" | "Needs Improvement" | "Risky" | "Critical",
       "summary": "1-2 sentences: what this PR does and overall quality verdict",
       "changeIntent": "bug_fix" | "feature" | "refactor" | "preventive_improvement" | "no_meaningful_change",
       "walkthrough": [
@@ -286,12 +248,15 @@ export const reviewService = async (diff: string) => {
           "line": number,
           "message": "Precise explanation — what breaks, when, and why in this specific code",
           "confidence": number,
-          "code": current code
+          "code": ONLY include the exact problematic lines from the added (+) lines of the diff. DO NOT reconstruct surrounding code. DO NOT guess missing context. If the exact snippet is not clearly present → omit this field.
           "suggestion": "Concrete fix with corrected code snippet",
         }
       ],
       "suggestions": [
-        "Concise, non-obvious, actionable improvement directly relevant to this diff"
+        {
+          file: path-to-file,
+          message: "Concise, non-obvious, actionable improvement directly relevant to this diff"
+        }
       ]
     }
 

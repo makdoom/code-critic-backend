@@ -16,8 +16,8 @@ export const config = {
 
   github: {
     webhookSecret: process.env.GITHUB_WEBHOOK_SECRET || "",
-    accessToken: process.env.GITHUB_ACCESS_TOKEN || "",
     githubAppId: process.env.GITHUB_APP_ID || "",
+    githubInstallationId: process.env.GITHUB_INSTALLATION_ID || 0,
     githubPrivateKey:
       process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, "\n") || "",
   },

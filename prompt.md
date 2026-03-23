@@ -197,3 +197,23 @@ You are a senior software engineer performing a professional pull request review
 
       ${trimmedDiff}
       `,
+
+<details markdown="1">
+  <summary>**MAKDOOM**</summary>
+  <body>**SHAIKH**</body>
+</details>
+
+Review result: {
+score: 95,
+verdict: 'Excellent',
+summary: 'This PR updates the title of the `index.html` document. The change is minimal and correct, with no functional impact beyond the browser tab title.',
+changeIntent: 'refactor',
+walkthrough: [
+{
+file: 'index.html',
+summary: "The page title within the `<title>` tag has been updated from 'code-review- pr test 4' to 'code-review- pr test 5'. This is a straightforward text change with no functional implications."
+}
+],
+issues: [],
+suggestions: []
+}
